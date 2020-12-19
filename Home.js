@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-native/no-inline-styles */
 import React, {useEffect, useState} from 'react';
@@ -20,7 +21,6 @@ const Home = ({navigation}) => {
   const [finalPrice, setFinalPrice] = useState('0.00');
   const [calError, setCalError] = useState('');
   const [history, setHistory] = useState(['']);
-  const [modalVisible, setModalVisible] = useState(false);
 
   const calculateDiscount = () => {
     if (discountPrc <= 100 && originalPrice >= 0 && discountPrc >= 0) {
@@ -36,16 +36,6 @@ const Home = ({navigation}) => {
     }
   };
 
-  const getData = async () => {
-    try {
-      const jsonValue = await AsyncStorage.getItem('@History:key');
-      return jsonValue != null ? JSON.parse(jsonValue) : [];
-    } catch (e) {
-      // error reading value
-      console.log(e);
-    }
-  };
-
   const storeData = async () => {
     try {
       var dash = ' | ';
@@ -58,16 +48,19 @@ const Home = ({navigation}) => {
         dash +
         'Rs: ' +
         finalPrice;
+      let jsonValue = await AsyncStorage.getItem('@History:key');
 
-      let value = getData();
+      let value = jsonValue != null ? JSON.parse(jsonValue) : [];
       if (value.length > 0) {
         value = [...value, result];
       } else {
         value = [];
         value.push(result);
       }
-      const jsonValue = JSON.stringify(value);
+      jsonValue = JSON.stringify(value);
       await AsyncStorage.setItem('@History:key', jsonValue);
+      setDicountPrc('');
+      setOriginalPrice('');
     } catch (e) {
       // saving error
       console.log(e);
@@ -96,9 +89,9 @@ const Home = ({navigation}) => {
     setDicountPrc('');
   };
 
-  const viewHistory = () => {
-    setModalVisible(true);
-  };
+  // const viewHistory = () => {
+  //   setModalVisible(true);
+  // };
 
   return (
     <View style={{flex: 1}}>
@@ -144,7 +137,18 @@ const Home = ({navigation}) => {
           </Text>
         </View>
         <View style={{paddingTop: 15}} />
-        <TouchableOpacity onPress={storeData} style={styles.saveBtn}>
+        <TouchableOpacity
+          disabled={originalPrice.length === 0 || discountPrc.length === 0}
+          onPress={storeData}
+          style={[
+            styles.saveBtn,
+            {
+              backgroundColor:
+                originalPrice.length === 0 || discountPrc.length === 0
+                  ? 'grey'
+                  : '#403cb8',
+            },
+          ]}>
           <Text style={styles.saveBtnText}>Save Result</Text>
         </TouchableOpacity>
         <View style={{paddingTop: 10}} />
@@ -154,7 +158,7 @@ const Home = ({navigation}) => {
           <Text style={styles.historyBtnText}>View History</Text>
         </TouchableOpacity>
 
-        <Modal
+        {/* <Modal
           animationType="slide"
           transparent={true}
           visible={modalVisible}
@@ -186,7 +190,7 @@ const Home = ({navigation}) => {
               </TouchableOpacity>
             </View>
           </View>
-        </Modal>
+        </Modal> */}
       </View>
     </View>
   );
